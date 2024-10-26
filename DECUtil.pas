@@ -1,14 +1,13 @@
 {*****************************************************************************
 
   Delphi Encryption Compendium (DEC Part I)
-  Version 5.2, Part I, for Delphi 7 - 10.2 Tokyo or higher/FPC 2.6 or higher
+  Version 5.3 for Delphi 7 - 10.4 or higher/FPC 2.6 or higher
 
   Remarks:          Freeware, Copyright must be included
 
   Original Author:  (c) 2006 Hagen Reddmann, HaReddmann [at] T-Online [dot] de
   Modifications:    (c) 2008 Arvid Winkelsdorf, info [at] digivendo [dot] de
-
-  Last change:      19. November 2017
+                    (c) 2017, 2021 decfpc
 
   Description:      Utilities for the DEC
 
@@ -35,16 +34,13 @@ unit DECUtil;
 
 interface
 
-uses {$IFDEF MSWINDOWS}Windows,{$ENDIF} SysUtils, Classes, CRC;
+uses {$IFDEF MSWINDOWS}Windows,{$ENDIF} SysUtils, Classes, DECCRC;
 
 type
 {$IFNDEF UNICODE}
   RawByteString  = AnsiString;
 {$ENDIF}
   Binary         = RawByteString; // LongString with Binary Content
-{$IFNDEF VER_D4H}
-  LongWord       = type Integer;
-{$ENDIF}
   PLongWord      = ^LongWord;
   PByte          = ^Byte;
   PInteger       = ^Integer;
@@ -109,7 +105,7 @@ procedure FoldStr(var Dest; DestSize: Integer; const Source: String);
 // Random Buffer/Binary, ATTENTION: standard Random function isn't
 // cryptographically secure, please include DECRandom to install secure PRNG
 function RandomBinary(Size: Integer): Binary;
-procedure RandomBuffer(var Buffer; Size: Integer);
+procedure RandomBuffer(out Buffer; Size: Integer);
 function RandomLong: LongWord;
 procedure RandomSeed(const Buffer; Size: Integer); overload;
 procedure RandomSeed; overload;
@@ -118,11 +114,11 @@ function RandomSystemTime: Cardinal;
 // reverse byte order of Buffer
 procedure SwapBytes(var Buffer; BufferSize: Integer);
 function SwapLong(Value: LongWord): LongWord;
-procedure SwapLongBuffer(const Source; var Dest; Count: Integer);
+procedure SwapLongBuffer(const Source; out Dest; Count: Integer);
 function SwapInt64(const Value: Int64): Int64;
 procedure SwapInt64Buffer(const Source; var Dest; Count: Integer);
 function SwapBits(Value, Bits: LongWord): LongWord;
-procedure XORBuffers(const Source1, Source2; Size: Integer; var Dest);
+procedure XORBuffers(const Source1, Source2; Size: Integer; out Dest);
 
 // safer test if AObject is valid
 function IsObject(AObject: Pointer; AClass: TClass): Boolean; {$IFDEF FPC}inline;{$ENDIF}
@@ -365,7 +361,7 @@ asm //equal to StrLComp(P1, P2, Size), but always Size Bytes are checked
        POP     ESI
 end;}
 
-procedure XORBuffers(const Source1, Source2; Size: Integer; var Dest);
+procedure XORBuffers(const Source1, Source2; Size: Integer; out Dest);
 {$IFDEF UseASM86}
 asm // Dest^ =  Source1^ xor Source2^ , Size bytes
        AND   ECX,ECX
@@ -541,7 +537,7 @@ end;
 var
   FRndSeed: Cardinal = 0;
 
-function DoRndBuffer(Seed: Cardinal; var Buffer; Size: Integer): Cardinal;
+function DoRndBuffer(Seed: Cardinal; out Buffer; Size: Integer): Cardinal;
 {$IFDEF UseASM86}
 // same as Borlands Random
 asm
@@ -642,7 +638,7 @@ begin
   RandomBuffer(Result[1], Size);
 end;
 
-procedure RandomBuffer(var Buffer; Size: Integer);
+procedure RandomBuffer(out Buffer; Size: Integer);
 begin
   if Assigned(DoRandomBuffer) then DoRandomBuffer(Buffer, Size)
     else FRndSeed := DoRndBuffer(FRndSeed, Buffer, Size);
@@ -731,7 +727,7 @@ begin
 end;
 {$ENDIF}
 
-procedure SwapLongBuffer(const Source; var Dest; Count: Integer);
+procedure SwapLongBuffer(const Source; out Dest; Count: Integer);
 {$IFDEF UseASM86}
   {$DEFINE SwapLongBuffer_asm}
 {$ENDIF}
@@ -875,13 +871,18 @@ end;
 {$ENDIF}
 
 {$IFNDEF FPC}
+{$IF CompilerVersion < 20.0}
+type
+  NativeInt = Integer;
+{$IFEND}
+
 procedure ModuleUnload(Instance: NativeInt);
 var // automaticaly deregistration/releasing
   I: Integer;
 begin
   if IsObject(FClasses, TList) then
     for I := FClasses.Count -1 downto 0 do
-      if Integer(FindClassHInstance(TClass(FClasses[I]))) = Instance then
+      if NativeInt(FindClassHInstance(TClass(FClasses[I]))) = Instance then
         FClasses.Delete(I);
 end;
 

@@ -1,14 +1,13 @@
 {*****************************************************************************
 
   Delphi Encryption Compendium (DEC Part I)
-  Version 5.2f, Part I, for Delphi 7 - 10.2 Tokyo or higher/FPC 2.6 or higher
+  Version 5.3 for Delphi 7 - 10.4 or higher/FPC 2.6 or higher
 
   Remarks:          Freeware, Copyright must be included
 
   Original Author:  (c) 2006 Hagen Reddmann, HaReddmann [at] T-Online [dot] de
   Modifications:    (c) 2008 Arvid Winkelsdorf, info [at] digivendo [dot] de
-
-  Last change:      19. November 2017
+                    (c) 2017, 2021 decfpc
 
   Description:      threadsafe CRC Checksum functions as single unit.
                     Implementation of Cyclic Redundance Checking.
@@ -45,7 +44,7 @@
 
 *****************************************************************************}
 
-unit CRC;
+unit DECCRC;
 
 {$IFDEF FPC}
   {$MODE Delphi}
@@ -102,7 +101,7 @@ type
 function CRCCalc(CRCType: TCRCType; const Buffer; Size: Cardinal): Cardinal;
 
 // use a callback
-function CRCCalcEx(CRCType: TCRCType; ReadMethod: TReadMethod; Size: Cardinal{$IFDEF VER_D4H} = $FFFFFFFF{$ENDIF}): Cardinal;
+function CRCCalcEx(CRCType: TCRCType; ReadMethod: TReadMethod; Size: Cardinal = $FFFFFFFF): Cardinal;
 
 // initialize CRC Definition with CRCType Standard CRC
 function CRCInit(var CRCDef: TCRCDef; CRCType: TCRCType): Boolean;
@@ -117,7 +116,7 @@ function CRCSetup(var CRCDef: TCRCDef; Polynomial, Bits, InitVector, FinalVector
 function CRCCode(var CRCDef: TCRCDef; const Buffer; Size: Cardinal): Cardinal;
 
 // use a callback, eg. TStream.Read(). I hate D4 because they don't love overloaded procedures here
-function CRCCodeEx(var CRCDef: TCRCDef; ReadMethod: TReadMethod; Size: Cardinal{$IFDEF VER_D4H} = $FFFFFFFF{$ENDIF}): Cardinal;
+function CRCCodeEx(var CRCDef: TCRCDef; ReadMethod: TReadMethod; Size: Cardinal = $FFFFFFFF): Cardinal;
 
 // retruns corrected CRC as definied in CRCDef, and reset CRCDef.CRC to InitVector
 function CRCDone(var CRCDef: TCRCDef): Cardinal;

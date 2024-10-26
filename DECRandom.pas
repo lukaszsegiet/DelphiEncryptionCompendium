@@ -1,14 +1,13 @@
 {*****************************************************************************
 
   Delphi Encryption Compendium (DEC Part I)
-  Version 5.2, Part I, for Delphi 7 - 10.2 Tokyo or higher/FPC 2.6 or higher
+  Version 5.3 for Delphi 7 - 10.4 or higher/FPC 2.6 or higher
 
   Remarks:          Freeware, Copyright must be included
 
   Original Author:  (c) 2006 Hagen Reddmann, HaReddmann [at] T-Online [dot] de
   Modifications:    (c) 2008 Arvid Winkelsdorf, info [at] digivendo [dot] de
-
-  Last change:      19. November 2017
+                    (c) 2017, 2021 decfpc
 
   Description:      Secure protected Random Number Generator based on Yarrow
 
